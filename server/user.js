@@ -1,4 +1,5 @@
 const cryptoJS = require("crypto-js");
+const message = require("./message");
 
 class User {
   constructor(userID, userPassword, roomID) {
@@ -19,7 +20,7 @@ class User {
 
   connect(
     request,
-    messageOnConnected = {},
+    chatRoomObj,
     onMessage = (userObj, message) => {},
     onDisconnect = (userObj) => {}
   ) {
@@ -32,7 +33,13 @@ class User {
       onDisconnect(this);
     });
     this.connection = connection;
-    this.sendMessage(messageOnConnected);
+    const newUserMessage = new message.ConnectedMessage(
+      this.roomID,
+      this.userID,
+      chatRoomObj.getUsers(),
+      chatRoomObj.history
+    );
+    this.sendMessage(newUserMessage);
   }
 
   disconnect() {

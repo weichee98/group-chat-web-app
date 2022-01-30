@@ -90,18 +90,7 @@ class ChatRoom {
     const userEnterMessage = new message.UserEnterMessage(this.roomID, userID);
     this.addToHistory(userEnterMessage);
     this.broadcastMessage(userEnterMessage, [userID]);
-    const newUserMessage = new message.ConnectedMessage(
-      this.roomID,
-      userID,
-      this.getUsers(),
-      this.history
-    );
-    userObj.connect(
-      request,
-      newUserMessage,
-      this.addNewMessage,
-      this.userLeaved
-    );
+    userObj.connect(request, this, this.addNewMessage, this.userLeaved);
     return true;
   }
 
@@ -144,7 +133,7 @@ class ChatRoom {
         " in room " +
         roomID +
         ": " +
-        messageObj
+        messageObj.messageString
     );
     this.broadcastMessage(newMessage);
   }
@@ -167,7 +156,7 @@ class ChatRoom {
   }
 
   getUsers() {
-    return Object.keys(this.users);
+    return Object.keys(this.users).filter((key) => this.users[key].isConnected);
   }
 }
 
