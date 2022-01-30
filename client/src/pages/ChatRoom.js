@@ -1,7 +1,8 @@
-import { Component } from "react";
+import { Component, createRef } from "react";
 import PropTypes from "prop-types";
 import { MESSAGE_TYPE } from "../utils";
-import { UsersSideBar } from "../components";
+import { UsersSideBar, MessageFactory } from "../components";
+import "./ChatRoom.css";
 
 class ChatRoom extends Component {
   constructor(props) {
@@ -12,7 +13,10 @@ class ChatRoom extends Component {
       messageString: "",
     };
     this.onInputChange = this.onInputChange.bind(this);
-    this.onButtonClicked = this.onButtonClicked.bind(this);
+    this.onSendMessage = this.onSendMessage.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
+    this.messagesEndRef = createRef();
+    this.sideBarRef = createRef();
   }
 
   static get propTypes() {
@@ -56,6 +60,7 @@ class ChatRoom extends Component {
       users: users,
       history: history,
     });
+    this.sideBarRef.current.setNewUsers(users);
   }
 
   userLeave(message) {
@@ -67,13 +72,18 @@ class ChatRoom extends Component {
       users: users,
       history: history,
     });
+    this.sideBarRef.current.setNewUsers(users);
   }
 
   onInputChange(event) {
     this.setState({ messageString: event.target.value });
   }
 
-  onButtonClicked() {
+  onSendMessage(event) {
+    event.preventDefault();
+    if (!this.state.messageString) {
+      return;
+    }
     this.props.client.send(
       JSON.stringify({
         type: "message",
@@ -82,54 +92,81 @@ class ChatRoom extends Component {
         messageString: this.state.messageString,
       })
     );
+    this.setState({ messageString: "" });
+  }
+
+  componentDidUpdate() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom() {
+    this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+
+  onKeyPress(event) {
+    if (event.keyCode == 13) {
+      if (!event.shiftKey && this.state.messageString) {
+        this.props.client.send(
+          JSON.stringify({
+            type: "message",
+            roomID: this.props.roomID,
+            userID: this.props.userID,
+            messageString: this.state.messageString,
+          })
+        );
+        this.setState({ messageString: "" });
+        event.preventDefault();
+      }
+    }
   }
 
   render() {
     return (
-      <div style={{ display: "flex", height: "100%" }}>
+      <div className="chatroom">
         <UsersSideBar
+          ref={this.sideBarRef}
           width="30%"
           maxWidth="20rem"
           userID={this.props.userID}
-          users={this.props.users}
+          users={this.state.users}
         ></UsersSideBar>
-        <div>
-          <h1>ChatRoom</h1>
-          <h3>Room: {this.props.roomID}</h3>
-          <h3>User: {this.props.userID}</h3>
-          <h2>Chat History</h2>
-          {this.state.history.map((message, i) => {
-            switch (message.type) {
-              case MESSAGE_TYPE.ROOM_CREATED:
-                return (
-                  <p key={i}>
-                    <b>Room {message.roomID} created</b>
-                  </p>
-                );
-              case MESSAGE_TYPE.MESSAGE:
-                return (
-                  <p key={i}>
-                    <b>User {message.userID}</b> - {message.messageString}
-                  </p>
-                );
-              case MESSAGE_TYPE.USER_ENTER:
-                return (
-                  <p key={i}>
-                    <b>User {message.userID} entered room</b>
-                  </p>
-                );
-              case MESSAGE_TYPE.USER_LEAVE:
-                return (
-                  <p key={i}>
-                    <b>User {message.userID} leaved room</b>
-                  </p>
-                );
-              default:
-                return <p key={i}>Invalid message</p>;
-            }
-          })}
-          <input onChange={this.onInputChange}></input>
-          <button onClick={this.onButtonClicked}>send</button>
+        <div
+          className="d-flex full-width full-height flex-column p-3"
+          style={{ opacity: "85%" }}
+        >
+          <div className="d-flex room-header">
+            <div className="alert room-header-component">
+              Room ID: <b>{this.props.roomID}</b>
+            </div>
+            <div className="alert room-header-component">
+              User ID: <b>{this.props.userID}</b>
+            </div>
+          </div>
+
+          <div className="d-flex full-width full-height flex-column p-3 card bg-light">
+            {this.state.history.map((message, i) =>
+              MessageFactory.getMessageComponent(i, this.props.userID, message)
+            )}
+            <div ref={this.messagesEndRef}></div>
+          </div>
+
+          <form
+            className="d-flex"
+            onSubmit={this.onSendMessage}
+            style={{ paddingTop: "1rem" }}
+          >
+            <textarea
+              className="form-control"
+              placeholder="Enter message ..."
+              value={this.state.messageString}
+              onKeyPress={this.onKeyPress}
+              onKeyDown={this.onKeyPress}
+              onChange={this.onInputChange}
+            ></textarea>
+            <button type="submit" className="btn btn-secondary">
+              Send
+            </button>
+          </form>
         </div>
       </div>
     );

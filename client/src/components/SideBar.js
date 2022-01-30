@@ -4,6 +4,13 @@ import PropTypes from "prop-types";
 class UsersSideBar extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      users: this.props.users,
+    };
+  }
+
+  setNewUsers(users) {
+    this.setState({ users: users });
   }
 
   static get propTypes() {
@@ -23,6 +30,7 @@ class UsersSideBar extends Component {
           width: this.props.width,
           maxWidth: this.props.maxWidth,
           height: "100%",
+          opacity: "85%",
         }}
       >
         <div
@@ -33,7 +41,7 @@ class UsersSideBar extends Component {
         </div>
         <hr></hr>
         <ul className="nav nav-pills flex-column mb-auto">
-          {this.props.users.map((userID) => {
+          {this.state.users.map((userID) => {
             const className =
               userID === this.props.userID
                 ? "nav-link active"

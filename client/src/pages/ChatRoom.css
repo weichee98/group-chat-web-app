@@ -1,0 +1,9 @@
+.chatroom {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  background-image: url(https://wallpaperaccess.com/full/261049.gif);
+  background-size: cover;
+  background-position-y: center;
+}

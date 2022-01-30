@@ -27,6 +27,9 @@ function App() {
   const onEnterRoom = (client, message) => {
     client.onclose = () => {
       setClient(null);
+      alert(
+        "Connection to server is closed unexpectedly. Please contact administrator for help."
+      );
     };
     setRoomID(message.roomID);
     setUserID(message.userID);

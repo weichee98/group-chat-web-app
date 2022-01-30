@@ -30,4 +30,44 @@
   border-radius: 0.3rem;
   flex: 5 !important;
 }
-  
+
+.full-width {
+  width: 100% !important;
+}
+
+.full-height {
+  height: 100% !important;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 1rem;
+}
+
+.alert {
+  margin-bottom: 0;
+  padding: 0.5rem;
+}
+
+.room-header {
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: rgb(220, 220, 220);
+}
+
+.room-header-component {
+  margin: 0 0.5rem;
+  font-size: large;
+  font-weight: 600;
+  flex: 1;
+}
+
+p {
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+
+.timestamp {
+  color: rgb(150, 150, 150);
+}
+
