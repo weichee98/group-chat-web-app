@@ -1,0 +1,33 @@
+.home-component-container {
+  padding: 1rem 1rem;	
+}
+
+.input-group {
+  padding: 0.4rem 0 0.4rem 0;
+  text-align: left;
+  display: flex;
+}
+  
+.input-group label {
+  padding-left: 0.8rem;
+  font-size: large;
+  flex: 2;
+  display: flex;
+  align-items: center;
+}
+
+.input-group input {
+  flex: 5 !important;
+}
+
+.input-group button {
+    flex: 5 !important;
+    font-weight: 600;
+  }
+
+.input-group .alert-danger {
+  text-align: left;
+  border-radius: 0.3rem;
+  flex: 5 !important;
+}
+  

@@ -1,0 +1,31 @@
+.home {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  background-image: url(https://wallpaperaccess.com/full/261049.gif);
+  background-size: cover;
+  background-position-y: center;
+}
+
+.home-container {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.home-container h1 {
+  padding: 2rem 0;
+  font-size: 4.5rem;
+  font-weight: 400;
+}
+
+.home-container .tabs {
+  width: 100%;
+  max-width: 45rem;
+  background-color: rgba(240, 250, 255, 0.8);
+  font-weight: 600;
+  font-size: large;
+}
