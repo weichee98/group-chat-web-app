@@ -16,6 +16,7 @@
     "prettier": "^2.5.1"
   },
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "http": "^0.0.1-security",
     "websocket": "^1.0.34"
   }
