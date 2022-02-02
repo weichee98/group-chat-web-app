@@ -133,7 +133,7 @@ class ChatRoom {
         " in room " +
         roomID +
         ": " +
-        messageObj.messageString
+        newMessage.messageID
     );
     this.broadcastMessage(newMessage);
   }
