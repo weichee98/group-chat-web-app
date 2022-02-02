@@ -11,10 +11,12 @@ class ChatRoom extends Component {
       users: this.props.users,
       history: this.props.history,
       messageString: "",
+      unreadMessages: 0,
     };
     this.onInputChange = this.onInputChange.bind(this);
     this.onSendMessage = this.onSendMessage.bind(this);
     this.onKeyPress = this.onKeyPress.bind(this);
+    this.scrollToBottom = this.scrollToBottom.bind(this);
     this.messagesEndRef = createRef();
     this.sideBarRef = createRef();
   }
@@ -44,12 +46,14 @@ class ChatRoom extends Component {
           break;
       }
     };
+    this.scrollToBottom();
   }
 
   addMessage(message) {
     const history = [...this.state.history, message];
     this.setState({
       history: history,
+      unreadMessages: this.state.unreadMessages + 1,
     });
   }
 
@@ -95,12 +99,40 @@ class ChatRoom extends Component {
     this.setState({ messageString: "" });
   }
 
-  componentDidUpdate() {
-    this.scrollToBottom();
+  getSnapshotBeforeUpdate(prevProps, prevState) {
+    return this.isAtBottom;
+  }
+
+  componentDidUpdate(prevProps, prevState, isAtBottom) {
+    if (
+      isAtBottom ||
+      this.state.history[this.state.history.length - 1].userID ===
+        this.props.userID
+    ) {
+      this.scrollToBottom();
+    }
+  }
+
+  get isAtBottom() {
+    if (!this.messagesEndRef.current) {
+      return false;
+    }
+    const rect = this.messagesEndRef.current.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <=
+        (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
   }
 
   scrollToBottom() {
-    this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (!this.messagesEndRef.current) {
+      return;
+    }
+    this.messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+    if (this.state.unreadMessages > 0) this.setState({ unreadMessages: 0 });
   }
 
   onKeyPress(event) {
@@ -143,11 +175,30 @@ class ChatRoom extends Component {
             </div>
           </div>
 
-          <div className="d-flex full-width full-height flex-column p-3 card bg-light">
+          <div
+            className="d-flex full-width full-height flex-column p-3 card bg-light"
+            onScroll={() => {
+              if (this.isAtBottom) this.setState({ unreadMessages: 0 });
+            }}
+          >
             {this.state.history.map((message, i) =>
               MessageFactory.getMessageComponent(i, this.props.userID, message)
             )}
             <div ref={this.messagesEndRef}></div>
+            {this.state.unreadMessages ? (
+              <button
+                className="badge rounded-pill btn btn-danger"
+                style={{ width: "fit-content", position: "sticky", bottom: 0 }}
+                onClick={this.scrollToBottom}
+              >
+                {(this.state.unreadMessages > 99
+                  ? "99+"
+                  : this.state.unreadMessages) +
+                  " unread message" +
+                  (this.state.unreadMessages === 1 ? "" : "s")}
+                <span className="visually-hidden">unread messages</span>
+              </button>
+            ) : null}
           </div>
 
           <form
