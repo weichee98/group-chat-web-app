@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { RoomTimeoutNotification } from "./Notification";
 import "./Component.css";
 
 class CreateNewRoom extends Component {
@@ -38,7 +39,6 @@ class CreateNewRoom extends Component {
               placeholder="Enter Room ID"
             ></input>
           </div>
-
           <div className="input-group form-group">
             <label htmlFor="roomPassword">Room Password</label>
             <input
@@ -48,7 +48,6 @@ class CreateNewRoom extends Component {
               placeholder="Enter Room Password"
             ></input>
           </div>
-
           {this.state.error ? (
             <div className="input-group form-group">
               <label></label>
@@ -57,13 +56,13 @@ class CreateNewRoom extends Component {
               </div>
             </div>
           ) : null}
-
           <div className="input-group form-group">
             <label></label>
             <button type="submit" className="btn btn-primary">
               Create New Room
             </button>
           </div>
+          <RoomTimeoutNotification />
         </form>
       </div>
     );

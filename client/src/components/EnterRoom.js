@@ -1,5 +1,6 @@
 import { Component } from "react";
 import PropTypes from "prop-types";
+import { RoomTimeoutNotification } from "./Notification";
 import "./Component.css";
 
 class EnterRoom extends Component {
@@ -95,6 +96,7 @@ class EnterRoom extends Component {
               Enter Room
             </button>
           </div>
+          <RoomTimeoutNotification />
         </form>
       </div>
     );
