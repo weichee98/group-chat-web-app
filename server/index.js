@@ -4,6 +4,7 @@ const webSocketServer = require("websocket").server;
 const http = require("http");
 const ChatRoom = require("./room").ChatRoom;
 const utils = require("./utils");
+const logger = require("./logger").logger;
 
 class Server {
   constructor(serverPort) {
@@ -19,14 +20,14 @@ class Server {
 
   deleteChatRoomOnTimeout(chatRoomObj) {
     delete this.chatRooms[chatRoomObj.roomID];
-    console.log("deleted room " + chatRoomObj.roomID);
+    logger.info("deleted room " + chatRoomObj.roomID);
   }
 
   bindServerPort() {
     this.httpServer.listen(this.serverPort);
     const message = "listening on port " + this.serverPort;
-    console.log(message);
-    console.log("=".repeat(message.length));
+    logger.info(message);
+    logger.info("=".repeat(message.length));
   }
 
   checkRoomIDValidity(roomID, request) {
@@ -35,7 +36,7 @@ class Server {
         request,
         "Invalid Room ID is given, Room ID cannot be empty."
       );
-      console.log("rejected incoming request as invalid room ID is given");
+      logger.error("rejected incoming request as invalid room ID is given");
       return false;
     }
     return true;
@@ -51,7 +52,7 @@ class Server {
         request,
         "Room ID " + roomID + " already exists."
       );
-      console.log("failed to create room " + roomID + " as it already exist");
+      logger.error("failed to create room " + roomID + " as it already exist");
       return false;
     }
 
@@ -66,7 +67,7 @@ class Server {
       request,
       "Room ID " + roomID + " successfully created"
     );
-    console.log("created new room " + roomID);
+    logger.info("created new room " + roomID);
     return true;
   }
 
@@ -84,7 +85,7 @@ class Server {
         request,
         "Invalid Room ID, Room ID does not exist."
       );
-      console.log(
+      logger.error(
         "failed to add user " +
           userID +
           " to room " +
@@ -100,7 +101,7 @@ class Server {
         request,
         "Room authentication failed due to incorrect Room ID or Room Password."
       );
-      console.log(
+      logger.error(
         "authentication failed for access to room " +
           roomID +
           " by user " +
@@ -130,7 +131,7 @@ class Server {
         break;
       default:
         request.reject("Invalid URL given");
-        console.log(
+        logger.error(
           "rejected incoming request due to invalid url " + request.resource
         );
         break;
