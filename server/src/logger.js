@@ -3,7 +3,7 @@ const log4js = require("log4js");
 log4js.configure({
   appenders: {
     console: { type: "stdout" },
-    logfile: { type: "file", filename: "server.log" },
+    logfile: { type: "file", filename: "logs/server.log" },
     error: { type: "logLevelFilter", appender: "logfile", level: "error" },
   },
   categories: {
