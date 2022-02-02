@@ -108,20 +108,36 @@ class ChatRoom {
     const roomID = userObj.roomID;
     if (roomID !== this.roomID) {
       logger.error(
-        "invalid message received by room " + this.roomID + ": " + message
+        "invalid message with roomID [" +
+          roomID +
+          "] received by room [" +
+          this.roomID +
+          "]"
       );
+      return;
     }
     if (!this.hasUser(userID)) {
       logger.error(
-        "message received from unregistered user " +
+        "message received from unregistered user [" +
           userID +
-          " by room " +
+          "] by room [" +
           this.roomID +
-          ": " +
-          message
+          "]"
       );
+      return;
     }
 
+    if (!messageObj.messageString) {
+      logger.error(
+        "invalid message received by room [" +
+          roomID +
+          "] from user [" +
+          userID +
+          "] with messageString [" +
+          messageObj.messageString +
+          "]"
+      );
+    }
     const newMessage = new message.NewMessage(
       roomID,
       userID,
@@ -129,12 +145,13 @@ class ChatRoom {
     );
     this.addToHistory(newMessage);
     logger.info(
-      "new message from user " +
+      "new message [" +
+        newMessage.messageID +
+        "] from user [" +
         userID +
-        " in room " +
+        "] in room [" +
         roomID +
-        ": " +
-        newMessage.messageID
+        "]"
     );
     this.broadcastMessage(newMessage);
   }

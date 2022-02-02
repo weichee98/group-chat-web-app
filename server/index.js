@@ -20,7 +20,7 @@ class Server {
 
   deleteChatRoomOnTimeout(chatRoomObj) {
     delete this.chatRooms[chatRoomObj.roomID];
-    logger.info("deleted room " + chatRoomObj.roomID);
+    logger.info("deleted room [" + chatRoomObj.roomID + "]");
   }
 
   bindServerPort() {
@@ -52,7 +52,9 @@ class Server {
         request,
         "Room ID " + roomID + " already exists."
       );
-      logger.error("failed to create room " + roomID + " as it already exist");
+      logger.error(
+        "failed to create room [" + roomID + "] as it already exist"
+      );
       return false;
     }
 
@@ -67,7 +69,7 @@ class Server {
       request,
       "Room ID " + roomID + " successfully created"
     );
-    logger.info("created new room " + roomID);
+    logger.info("created new room [" + roomID + "]");
     return true;
   }
 
@@ -86,11 +88,11 @@ class Server {
         "Invalid Room ID, Room ID does not exist."
       );
       logger.error(
-        "failed to add user " +
+        "failed to add user [" +
           userID +
-          " to room " +
+          "] to room [" +
           roomID +
-          " that does not exist"
+          "] that does not exist"
       );
       return;
     }
@@ -102,10 +104,11 @@ class Server {
         "Room authentication failed due to incorrect Room ID or Room Password."
       );
       logger.error(
-        "authentication failed for access to room " +
+        "authentication failed for access to room [" +
           roomID +
-          " by user " +
-          userID
+          "] by user [" +
+          userID +
+          "]"
       );
       return;
     }
@@ -132,7 +135,9 @@ class Server {
       default:
         request.reject("Invalid URL given");
         logger.error(
-          "rejected incoming request due to invalid url " + request.resource
+          "rejected incoming request due to invalid url [" +
+            request.resource +
+            "]"
         );
         break;
     }
