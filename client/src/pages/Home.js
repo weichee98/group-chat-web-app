@@ -5,6 +5,9 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { MESSAGE_TYPE } from "../utils";
 import "./Home.css";
 
+const webSocketPort = 8000;
+const webSocketURL = "ws://" + location.hostname + ":" + webSocketPort;
+
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -24,7 +27,7 @@ class Home extends Component {
   }
 
   onCreateRoom(createNewRoomObj, roomID, roomPassword) {
-    const url = "ws://127.0.0.1:8000/createRoom";
+    const url = webSocketURL + "/createRoom";
     var query = "";
     if (roomID) {
       query = query + (query ? "&" : "?") + "roomID=" + roomID;
@@ -50,7 +53,7 @@ class Home extends Component {
   }
 
   onEnterRoom(enterRoomObj, roomID, roomPassword, userID, userPassword) {
-    const url = "ws://127.0.0.1:8000/chatRoom";
+    const url = webSocketURL + "/chatRoom";
     var query = "";
     if (roomID) {
       query = query + (query ? "&" : "?") + "roomID=" + roomID;
