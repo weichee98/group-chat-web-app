@@ -1,5 +1,6 @@
 const webSocketServerPort = 8000;
 const chatRoomTimout = 900000;
+const baseFolder = ".cache";
 const webSocketServer = require("websocket").server;
 const http = require("http");
 const ChatRoom = require("./room").ChatRoom;
@@ -7,6 +8,8 @@ const utils = require("./utils");
 const logger = require("./logger").logger;
 const error = require("./error");
 const info = require("./info");
+const fs = require("fs");
+const path = require("path");
 
 class Server {
   constructor(serverPort) {
@@ -18,9 +21,11 @@ class Server {
     this.httpServer = http.createServer();
     this.bindServerPort();
     this.initWebSocketServer();
+    this.loadFromFolder(baseFolder);
   }
 
   deleteChatRoomOnTimeout(chatRoomObj) {
+    chatRoomObj.delete();
     delete this.chatRooms[chatRoomObj.roomID];
     const infoObj = new info.DeletedRoomInfo(chatRoomObj.roomID);
     logger.info(infoObj.toString());
@@ -65,6 +70,7 @@ class Server {
       this.deleteChatRoomOnTimeout
     );
     this.chatRooms[roomID] = newRoom;
+    newRoom.initFolder(baseFolder);
     const infoObj = new info.CreatedNewRoomInfo(roomID);
     utils.replySuccessMessage(request, infoObj.toString());
     logger.info(infoObj.toString());
@@ -130,6 +136,24 @@ class Server {
   initWebSocketServer() {
     this.webSocketServer = new webSocketServer({ httpServer: this.httpServer });
     this.webSocketServer.on("request", this.requestWebSocketServer);
+  }
+
+  loadFromFolder(baseFolder) {
+    fs.readdir(baseFolder, null, (error, allSubDir) => {
+      if (error) {
+        logger.error(error.toString());
+        return;
+      }
+      allSubDir.forEach((subdir) => {
+        const roomFolder = path.resolve(baseFolder + "/" + subdir);
+        const room = ChatRoom.loadFromFolder(
+          roomFolder,
+          chatRoomTimout,
+          this.deleteChatRoomOnTimeout
+        );
+        if (room) this.chatRooms[room.roomID] = room;
+      });
+    });
   }
 }
 

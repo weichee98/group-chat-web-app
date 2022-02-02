@@ -14,5 +14,27 @@ function replySuccessMessage(request, successMessageString) {
   connection.close();
 }
 
+function parseJSON(data) {
+  const lines = [];
+  var open = 0;
+  var start = -1;
+  for (var i = 0; i < data.length; i++) {
+    const c = data[i];
+    if (c === "{") {
+      start = open === 0 ? i : start;
+      open += 1;
+      continue;
+    }
+    if (c === "}") {
+      open -= 1;
+      if (open === 0) {
+        lines.push(data.substring(start, i + 1));
+      }
+    }
+  }
+  return lines;
+}
+
 exports.replyErrorMessage = replyErrorMessage;
 exports.replySuccessMessage = replySuccessMessage;
+exports.parseJSON = parseJSON;

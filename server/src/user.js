@@ -1,4 +1,5 @@
 const cryptoJS = require("crypto-js");
+const logger = require("./logger").logger;
 const message = require("./message");
 
 class User {
@@ -7,6 +8,26 @@ class User {
     this.authHash = cryptoJS.HmacMD5(userID, userPassword).toString();
     this.roomID = roomID;
     this.connection = null;
+  }
+
+  static fromJSON(jsonString) {
+    try {
+      const jsonObj = JSON.parse(jsonString);
+      const user = new User(jsonObj.userID, "", jsonObj.roomID);
+      user.authHash = jsonObj.authHash;
+      return user;
+    } catch (error) {
+      logger.error("user from JSON: " + error.toString());
+      return null;
+    }
+  }
+
+  toJSON() {
+    return JSON.stringify({
+      userID: this.userID,
+      authHash: this.authHash,
+      roomID: this.roomID,
+    });
   }
 
   get isConnected() {

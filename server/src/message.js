@@ -24,6 +24,44 @@ class MESSAGE_TYPE {
   }
 }
 
+class MessageParser {
+  static toJSON(message) {
+    return JSON.stringify(message);
+  }
+
+  static fromJSON(jsonString) {
+    try {
+      const jsonObj = JSON.parse(jsonString);
+      var messageObj = null;
+      switch (jsonObj.type) {
+        case MESSAGE_TYPE.ROOM_CREATED:
+          messageObj = new RoomCreatedMessage(jsonObj.roomID);
+          break;
+        case MESSAGE_TYPE.USER_ENTER:
+          messageObj = new UserEnterMessage(jsonObj.roomID, jsonObj.userID);
+          break;
+        case MESSAGE_TYPE.USER_LEAVE:
+          messageObj = new UserLeaveMessage(jsonObj.roomID, jsonObj.userID);
+          break;
+        case MESSAGE_TYPE.MESSAGE:
+          messageObj = new NewMessage(
+            jsonObj.roomID,
+            jsonObj.userID,
+            jsonObj.messageString
+          );
+          break;
+        default:
+          break;
+      }
+      if (!messageObj) return null;
+      messageObj.timestamp = jsonObj.timestamp;
+      return messageObj;
+    } catch {
+      return null;
+    }
+  }
+}
+
 class MessageInterface {
   constructor(type, roomID) {
     this.timestamp = new Date();
@@ -95,6 +133,7 @@ class SuccessMessage extends MessageInterface {
   }
 }
 
+exports.MessageParser = MessageParser;
 exports.RoomCreatedMessage = RoomCreatedMessage;
 exports.UserEnterMessage = UserEnterMessage;
 exports.UserLeaveMessage = UserLeaveMessage;
