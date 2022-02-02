@@ -1,3 +1,5 @@
+const cryptoJS = require("crypto-js");
+
 class MESSAGE_TYPE {
   static get CONNECTED() {
     return "connected";
@@ -27,6 +29,17 @@ class MessageInterface {
     this.timestamp = new Date();
     this.type = type;
     this.roomID = roomID;
+  }
+
+  get messageID() {
+    var hmac = cryptoJS.algo.HMAC.create(
+      cryptoJS.algo.MD5,
+      this.timestamp.toString()
+    );
+    hmac.update(this.type);
+    hmac.update(this.roomID);
+    var hash = hmac.finalize();
+    return hash.toString();
   }
 }
 
