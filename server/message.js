@@ -36,8 +36,8 @@ class MessageInterface {
       cryptoJS.algo.MD5,
       this.timestamp.toString()
     );
-    hmac.update(this.type);
-    hmac.update(this.roomID);
+    hmac.update(this.type.toString());
+    hmac.update(this.roomID.toString());
     var hash = hmac.finalize();
     return hash.toString();
   }
