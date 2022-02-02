@@ -5,6 +5,8 @@ const http = require("http");
 const ChatRoom = require("./room").ChatRoom;
 const utils = require("./utils");
 const logger = require("./logger").logger;
+const error = require("./error");
+const info = require("./info");
 
 class Server {
   constructor(serverPort) {
@@ -20,23 +22,23 @@ class Server {
 
   deleteChatRoomOnTimeout(chatRoomObj) {
     delete this.chatRooms[chatRoomObj.roomID];
-    logger.info("deleted room [" + chatRoomObj.roomID + "]");
+    const infoObj = new info.DeletedRoomInfo(chatRoomObj.roomID);
+    logger.info(infoObj.toString());
   }
 
   bindServerPort() {
     this.httpServer.listen(this.serverPort);
-    const message = "listening on port " + this.serverPort;
-    logger.info(message);
-    logger.info("=".repeat(message.length));
+    const infoObj = new info.ListeningToPortInfo(this.serverPort);
+    logger.info(infoObj.toString());
   }
 
   checkRoomIDValidity(roomID, request) {
     if (!roomID) {
-      utils.replyErrorMessage(
-        request,
-        "Invalid Room ID is given, Room ID cannot be empty."
+      const errorObj = new error.RejectedIncomingRequestError(
+        new error.RejectedIncomingRequestError.InvalidRoomID(roomID)
       );
-      logger.error("rejected incoming request as invalid room ID is given");
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return false;
     }
     return true;
@@ -48,13 +50,11 @@ class Server {
     }
 
     if (this.hasRoom(roomID)) {
-      utils.replyErrorMessage(
-        request,
-        "Room ID " + roomID + " already exists."
+      const errorObj = new error.FailedToCreateRoomError(
+        new error.FailedToCreateRoomError.RoomAlreadyExist(roomID)
       );
-      logger.error(
-        "failed to create room [" + roomID + "] as it already exist"
-      );
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return false;
     }
 
@@ -65,11 +65,9 @@ class Server {
       this.deleteChatRoomOnTimeout
     );
     this.chatRooms[roomID] = newRoom;
-    utils.replySuccessMessage(
-      request,
-      "Room ID " + roomID + " successfully created"
-    );
-    logger.info("created new room [" + roomID + "]");
+    const infoObj = new info.CreatedNewRoomInfo(roomID);
+    utils.replySuccessMessage(request, infoObj.toString());
+    logger.info(infoObj.toString());
     return true;
   }
 
@@ -83,33 +81,19 @@ class Server {
     }
 
     if (!this.hasRoom(roomID)) {
-      utils.replyErrorMessage(
-        request,
-        "Invalid Room ID, Room ID does not exist."
+      const errorObj = new error.RejectedIncomingRequestError(
+        new error.RejectedIncomingRequestError.RoomDoesNotExist(roomID)
       );
-      logger.error(
-        "failed to add user [" +
-          userID +
-          "] to room [" +
-          roomID +
-          "] that does not exist"
-      );
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return;
     }
 
     const chatRoomObj = this.chatRooms[roomID];
     if (!chatRoomObj.authenticate(roomID, roomPassword)) {
-      utils.replyErrorMessage(
-        request,
-        "Room authentication failed due to incorrect Room ID or Room Password."
-      );
-      logger.error(
-        "authentication failed for access to room [" +
-          roomID +
-          "] by user [" +
-          userID +
-          "]"
-      );
+      const errorObj = new error.RoomAuthenticationFailedError(roomID);
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return;
     }
 
@@ -125,6 +109,10 @@ class Server {
     const userID = query.userID;
     const userPassword = query.userPassword ? query.userPassword : "";
 
+    const errorObj = new error.RejectedIncomingRequestError(
+      new error.RejectedIncomingRequestError.InvalidURL(request.resource)
+    );
+
     switch (pathname) {
       case "/createRoom":
         this.createNewRoom(roomID, roomPassword, request);
@@ -133,12 +121,8 @@ class Server {
         this.addUserToRoom(roomID, roomPassword, userID, userPassword, request);
         break;
       default:
-        request.reject("Invalid URL given");
-        logger.error(
-          "rejected incoming request due to invalid url [" +
-            request.resource +
-            "]"
-        );
+        request.reject(errorObj.toString());
+        logger.error(errorObj.toString());
         break;
     }
   }

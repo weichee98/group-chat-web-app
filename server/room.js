@@ -3,6 +3,8 @@ const message = require("./message");
 const User = require("./user").User;
 const utils = require("./utils");
 const logger = require("./logger").logger;
+const error = require("./error");
+const info = require("./info");
 
 class ChatRoom {
   constructor(
@@ -49,11 +51,11 @@ class ChatRoom {
 
   checkUserIDValidity(userID, request) {
     if (!userID) {
-      utils.replyErrorMessage(
-        request,
-        "Invalid User ID is given, User ID cannot be empty."
+      const errorObj = new error.RejectedIncomingRequestError(
+        new error.RejectedIncomingRequestError.InvalidUserID(userID)
       );
-      logger.error("rejected incoming request as invalid user ID is given");
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return false;
     }
     return true;
@@ -69,23 +71,19 @@ class ChatRoom {
       userObj = this.users[userID];
       if (userObj.authenticate(userID, userPassword)) {
         userObj.disconnect();
-        logger.info(
-          "update connection for user " + userID + " in room " + this.roomID
-        );
+        const infoObj = new info.UpdateUserConnectionInfo(userID, this.roomID);
+        logger.info(infoObj.toString());
       } else {
-        utils.replyErrorMessage(
-          request,
-          "User authentication failed due to incorrect User ID or User Password."
-        );
-        logger.error(
-          "authentication failed for user " + userID + " in room " + this.roomID
-        );
+        const errorObj = new error.UserAuthenticationFailedError(userID);
+        utils.replyErrorMessage(request, errorObj.toString());
+        logger.error(errorObj.toString());
         return false;
       }
     } else {
       userObj = new User(userID, userPassword, this.roomID);
       this.users[userID] = userObj;
-      logger.info("added new user " + userID + " to room " + this.roomID);
+      const infoObj = new info.AddedNewUserInfo(userID, this.roomID);
+      logger.info(infoObj.toString());
     }
 
     const userEnterMessage = new message.UserEnterMessage(this.roomID, userID);
@@ -99,44 +97,42 @@ class ChatRoom {
     const userID = userObj.userID;
     const userLeaveMessage = new message.UserLeaveMessage(this.roomID, userID);
     this.addToHistory(userLeaveMessage);
-    logger.info("removed user " + userID + " from chatroom " + this.roomID);
+    const infoObj = new info.RemovedUserFromRoomInfo(userID, this.roomID);
+    logger.info(infoObj.toString());
     this.broadcastMessage(userLeaveMessage);
   }
 
-  addNewMessage(userObj, messageObj) {
+  addNewMessage(request, userObj, messageObj) {
     const userID = userObj.userID;
     const roomID = userObj.roomID;
     if (roomID !== this.roomID) {
-      logger.error(
-        "invalid message with roomID [" +
-          roomID +
-          "] received by room [" +
-          this.roomID +
-          "]"
+      const errorObj = new error.InvalidMessageError(
+        new error.InvalidMessageError.RoomIDDoesNotMatch(roomID, this.roomID)
       );
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return;
     }
     if (!this.hasUser(userID)) {
-      logger.error(
-        "message received from unregistered user [" +
-          userID +
-          "] by room [" +
-          this.roomID +
-          "]"
+      const errorObj = new error.InvalidMessageError(
+        new error.InvalidMessageError.UnregisteredUserID(userID, roomID)
       );
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
       return;
     }
 
     if (!messageObj.messageString) {
-      logger.error(
-        "invalid message received by room [" +
-          roomID +
-          "] from user [" +
-          userID +
-          "] with messageString [" +
-          messageObj.messageString +
-          "]"
+      const errorObj = new error.InvalidMessageError(
+        new error.InvalidMessageError.InvalidMessageString(
+          userID,
+          roomID,
+          messageObj.messageString
+        )
       );
+      utils.replyErrorMessage(request, errorObj.toString());
+      logger.error(errorObj.toString());
+      return;
     }
     const newMessage = new message.NewMessage(
       roomID,
@@ -144,15 +140,12 @@ class ChatRoom {
       messageObj.messageString
     );
     this.addToHistory(newMessage);
-    logger.info(
-      "new message [" +
-        newMessage.messageID +
-        "] from user [" +
-        userID +
-        "] in room [" +
-        roomID +
-        "]"
+    const infoObj = new info.ReceivedNewMessageInfo(
+      userID,
+      roomID,
+      newMessage.messageID
     );
+    logger.info(infoObj.toString());
     this.broadcastMessage(newMessage);
   }
 

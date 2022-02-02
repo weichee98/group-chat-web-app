@@ -21,12 +21,12 @@ class User {
   connect(
     request,
     chatRoomObj,
-    onMessage = (userObj, message) => {},
+    onMessage = (request, userObj, message) => {},
     onDisconnect = (userObj) => {}
   ) {
     const connection = request.accept(null, request.origin);
     connection.on("message", (message) => {
-      onMessage(this, JSON.parse(message.utf8Data));
+      onMessage(request, this, JSON.parse(message.utf8Data));
     });
     connection.on("close", () => {
       this.connection = null;
