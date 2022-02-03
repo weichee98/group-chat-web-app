@@ -47,11 +47,19 @@ class User {
   ) {
     const connection = request.accept(null, request.origin);
     connection.on("message", (message) => {
-      onMessage(request, this, JSON.parse(message.utf8Data));
+      try {
+        onMessage(request, this, JSON.parse(message.utf8Data));
+      } catch (error) {
+        logger.error("user connection on message: " + error.toString());
+      }
     });
     connection.on("close", () => {
-      this.connection = null;
-      onDisconnect(this);
+      try {
+        this.connection = null;
+        onDisconnect(this);
+      } catch (error) {
+        logger.error("user connection on close: " + error.toString());
+      }
     });
     this.connection = connection;
     const newUserMessage = new message.ConnectedMessage(

@@ -107,29 +107,40 @@ class Server {
   }
 
   requestWebSocketServer(request) {
-    const pathname = request.resourceURL.pathname;
-    const query = request.resourceURL.query;
+    try {
+      const pathname = request.resourceURL.pathname;
+      const query = request.resourceURL.query;
 
-    const roomID = query.roomID;
-    const roomPassword = query.roomPassword ? query.roomPassword : "";
-    const userID = query.userID;
-    const userPassword = query.userPassword ? query.userPassword : "";
+      const roomID = query.roomID;
+      const roomPassword = query.roomPassword ? query.roomPassword : "";
+      const userID = query.userID;
+      const userPassword = query.userPassword ? query.userPassword : "";
 
-    const errorObj = new error.RejectedIncomingRequestError(
-      new error.RejectedIncomingRequestError.InvalidURL(request.resource)
-    );
+      const errorObj = new error.RejectedIncomingRequestError(
+        new error.RejectedIncomingRequestError.InvalidURL(request.resource)
+      );
 
-    switch (pathname) {
-      case "/createRoom":
-        this.createNewRoom(roomID, roomPassword, request);
-        break;
-      case "/chatRoom":
-        this.addUserToRoom(roomID, roomPassword, userID, userPassword, request);
-        break;
-      default:
-        request.reject(errorObj.toString());
-        logger.error(errorObj.toString());
-        break;
+      switch (pathname) {
+        case "/createRoom":
+          this.createNewRoom(roomID, roomPassword, request);
+          break;
+        case "/chatRoom":
+          this.addUserToRoom(
+            roomID,
+            roomPassword,
+            userID,
+            userPassword,
+            request
+          );
+          break;
+        default:
+          request.reject(errorObj.toString());
+          logger.error(errorObj.toString());
+          break;
+      }
+    } catch (err) {
+      request.reject(err.toString());
+      logger.error("web socket server on request: " + err.toString());
     }
   }
 
