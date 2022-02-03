@@ -16,19 +16,25 @@ function replySuccessMessage(request, successMessageString) {
 
 function parseJSON(data) {
   const lines = [];
-  var open = 0;
-  var start = -1;
+  var bracketOpen = 0;
+  var stringOpen = false;
+  var bracketStart = -1;
   for (var i = 0; i < data.length; i++) {
     const c = data[i];
+    if (c === '"') {
+      stringOpen = i > 0 && data[i - 1] === "\\" ? stringOpen : !stringOpen;
+      continue;
+    }
+    if (stringOpen) continue;
     if (c === "{") {
-      start = open === 0 ? i : start;
-      open += 1;
+      bracketStart = i;
+      bracketOpen += 1;
       continue;
     }
     if (c === "}") {
-      open -= 1;
-      if (open === 0) {
-        lines.push(data.substring(start, i + 1));
+      bracketOpen -= 1;
+      if (bracketOpen === 0) {
+        lines.push(data.substring(bracketStart, i + 1));
       }
     }
   }
