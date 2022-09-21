@@ -1,0 +1,73 @@
+.home-component-container {
+  padding: 1rem 1rem;	
+}
+
+.input-group {
+  padding: 0.4rem 0 0.4rem 0;
+  text-align: left;
+  display: flex;
+}
+  
+.input-group label {
+  padding-left: 0.8rem;
+  font-size: large;
+  flex: 2;
+  display: flex;
+  align-items: center;
+}
+
+.input-group input {
+  flex: 5 !important;
+}
+
+.input-group button {
+    flex: 5 !important;
+    font-weight: 600;
+  }
+
+.input-group .alert-danger {
+  text-align: left;
+  border-radius: 0.3rem;
+  flex: 5 !important;
+}
+
+.full-width {
+  width: 100% !important;
+}
+
+.full-height {
+  height: 100% !important;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 1rem;
+}
+
+.alert {
+  margin-bottom: 0;
+  padding: 0.5rem;
+}
+
+.room-header {
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: rgb(220, 220, 220);
+}
+
+.room-header-component {
+  margin: 0 0.5rem;
+  font-size: large;
+  font-weight: 600;
+  flex: 1;
+}
+
+p {
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+
+.timestamp {
+  color: rgb(150, 150, 150);
+}
+
